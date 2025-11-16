@@ -2,6 +2,9 @@
 
 Dono is a modern web application built with [your tech stack] that makes it radically easier for people to discover, share, and donate to charities, nonprofits, and other mission driven organizations.
 
+## Install
+Download and Run: build/windows/x64/runner/Release/hackathon_web_app.exe
+
 ## About
 
 Dono is a social donation platform that removes friction from giving. Instead of hunting down individual donation pages and re entering payment information every time, users can discover causes, see what their network is supporting, and donate in just a few clicks from one connected account.
