@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app_theme.dart';
 import 'router.dart';
@@ -7,7 +8,22 @@ import 'router.dart';
 ///
 /// `runApp` takes the root widget of your app and attaches it to the screen.
 /// This is the first function that runs when the app starts.
-void main() {
+///
+/// We load environment variables from the .env file before starting the app.
+/// This allows us to securely store API keys and other configuration.
+Future<void> main() async {
+  // Load environment variables from .env file
+  // This must be done before runApp() is called
+  // The .env file should be in the root of your project
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    // If .env file doesn't exist, the app will still run
+    // but API keys won't be available
+    debugPrint('Warning: Could not load .env file: $e');
+    debugPrint('Make sure you have a .env file in the root directory with N8N_API_KEY');
+  }
+
   runApp(const MyApp());
 }
 

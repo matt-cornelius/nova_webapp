@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'demo_data/donations_demo.dart';
 import 'donations_provider.dart';
@@ -34,54 +36,72 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       // AppBar automatically uses our theme settings for clean, modern look
-      appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar(
+        title: const Text('Home'),
+        centerTitle: true, // Center the title in the AppBar
+      ),
       // `body` is the main content area of the screen.
-      body: Padding(
-        padding: const EdgeInsets.all(
-          20.0,
-        ), // Slightly more padding for cleaner spacing
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // Welcome header with modern typography
-            Text(
-              'Welcome back 👋',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.5, // Tighter spacing for modern feel
-              ),
-            ),
-            const SizedBox(height: 12), // More space for cleaner look
-            // Subtitle with secondary text color for hierarchy
-            Text(
-              'Here are the latest donations happening on the platform.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: colors
-                    .onSurfaceVariant, // Use theme color for secondary text
-              ),
-            ),
-            const SizedBox(height: 24), // More space before cards
-            Expanded(
-              // `ListView.builder` lazily builds only the visible cards,
-              // which is good practice even for small lists.
-              child: ListView.builder(
-                itemCount: donations.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final Donation donation = donations[index];
-                  return _DonationCard(
-                    donation: donation,
-                    isLiked: _provider.isLiked(donation.id),
-                    onToggleLike: () {
-                      // We tell the provider to toggle the like state, then
-                      // call `setState` to trigger a rebuild so the UI updates.
-                      _provider.toggleLike(donation.id);
-                      setState(() {});
+      // For desktop apps, we center the content and constrain its width
+      body: Center(
+        child: ConstrainedBox(
+          // Max width prevents content from stretching too wide on large desktop screens
+          // 800px is a good max width for desktop readability
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Padding(
+            padding: const EdgeInsets.all(
+              20.0,
+            ), // Slightly more padding for cleaner spacing
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Center all content horizontally
+              children: <Widget>[
+                // Welcome header with modern typography - centered
+                Center(
+                  child: Text(
+                    'Welcome back 👋',
+                    textAlign: TextAlign.center, // Center the text
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5, // Tighter spacing for modern feel
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12), // More space for cleaner look
+                // Subtitle with secondary text color for hierarchy - centered
+                Center(
+                  child: Text(
+                    'Here are the latest donations happening on the platform.',
+                    textAlign: TextAlign.center, // Center the text
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colors
+                          .onSurfaceVariant, // Use theme color for secondary text
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24), // More space before cards
+                Expanded(
+                  // `ListView.builder` lazily builds only the visible cards,
+                  // which is good practice even for small lists.
+                  child: ListView.builder(
+                    itemCount: donations.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final Donation donation = donations[index];
+                      return _DonationCard(
+                        donation: donation,
+                        isLiked: _provider.isLiked(donation.id),
+                        onToggleLike: () {
+                          // We tell the provider to toggle the like state, then
+                          // call `setState` to trigger a rebuild so the UI updates.
+                          _provider.toggleLike(donation.id);
+                          setState(() {});
+                        },
+                      );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       // Our custom bottom navigation bar shared across main pages.
@@ -225,6 +245,7 @@ class _DonationCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   // FOOTER: summary line like "Paid $25.00 to Clean Water Now".
                   // Highlight amount with primary color for emphasis
+                  // Organization name is clickable and navigates to the organization profile
                   RichText(
                     text: TextSpan(
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -240,9 +261,28 @@ class _DonationCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                        const TextSpan(text: ' to '),
+                        // Make organization name clickable - wrap in GestureRecognizer
+                        // This allows the text to be tappable while keeping it inline
                         TextSpan(
-                          text:
-                              ' to ${organization?.name ?? 'Unknown organization'}',
+                          text: organization?.name ?? 'Unknown organization',
+                          style: TextStyle(
+                            color: colors
+                                .primary, // Use primary color to indicate it's clickable
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            decorationColor: colors.primary,
+                          ),
+                          recognizer: organization != null
+                              ? (TapGestureRecognizer()
+                                  ..onTap = () {
+                                    // Navigate to the organization profile page using GoRouter
+                                    // The route expects the organization ID as a path parameter
+                                    context.push(
+                                      '/organization/${organization.id}',
+                                    );
+                                  })
+                              : null,
                         ),
                       ],
                     ),

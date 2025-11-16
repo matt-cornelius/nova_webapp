@@ -48,42 +48,65 @@ class GroupsPage extends StatelessWidget {
 
     return Scaffold(
       // AppBar automatically uses theme - clean and modern
-      appBar: AppBar(title: const Text('Groups'), centerTitle: false),
+      appBar: AppBar(
+        title: const Text('Groups'),
+        centerTitle: true, // Center the title in the AppBar
+      ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0), // More padding for cleaner look
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Header - bold, modern typography
-              Text(
-                'Join people who care about the same causes.',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.3, // Tighter spacing for modern feel
-                ),
+        // For desktop apps, we center the content and constrain its width
+        child: Center(
+          child: ConstrainedBox(
+            // Max width prevents content from stretching too wide on large desktop screens
+            // 800px is a good max width for desktop readability
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Padding(
+              padding: const EdgeInsets.all(
+                20.0,
+              ), // More padding for cleaner look
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment
+                    .center, // Center all content horizontally
+                children: <Widget>[
+                  // Header - bold, modern typography - centered
+                  Center(
+                    child: Text(
+                      'Join people who care about the same causes.',
+                      textAlign: TextAlign.center, // Center the text
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing:
+                                -0.3, // Tighter spacing for modern feel
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 12), // More spacing
+                  // Subtitle - secondary text color for hierarchy - centered
+                  Center(
+                    child: Text(
+                      'Groups make it easier to coordinate donations, set shared goals, '
+                      'and see your combined impact over time.',
+                      textAlign: TextAlign.center, // Center the text
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color:
+                            colors.onSurfaceVariant, // Use theme secondary text
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24), // More spacing before list
+                  Expanded(
+                    // ListView.builder efficiently renders only the visible cards.
+                    child: ListView.builder(
+                      itemCount: groups.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final _DemoGroup group = groups[index];
+                        return _GroupCard(group: group);
+                      },
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12), // More spacing
-              // Subtitle - secondary text color for hierarchy
-              Text(
-                'Groups make it easier to coordinate donations, set shared goals, '
-                'and see your combined impact over time.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colors.onSurfaceVariant, // Use theme secondary text
-                ),
-              ),
-              const SizedBox(height: 24), // More spacing before list
-              Expanded(
-                // ListView.builder efficiently renders only the visible cards.
-                child: ListView.builder(
-                  itemCount: groups.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final _DemoGroup group = groups[index];
-                    return _GroupCard(group: group);
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

@@ -6,6 +6,7 @@ import 'groups.dart';
 import 'explore.dart';
 import 'profile.dart';
 import 'group_chat.dart';
+import 'organization_profile.dart';
 
 /// Central place where we define all the routes (screens) in the app.
 ///
@@ -71,6 +72,22 @@ final GoRouter appRouter = GoRouter(
         }
 
         return GroupChatPage(groupName: groupName);
+      },
+    ),
+    GoRoute(
+      // Route for the **organization profile** page.
+      //
+      // Uses a path parameter `:id` to identify which organization to display.
+      // The organization ID is extracted from the URL path and passed to the page.
+      // Example: `/organization/org_clean_water` will show the Clean Water Now profile.
+      path: '/organization/:id',
+      name: 'organizationProfile',
+      builder: (BuildContext context, GoRouterState state) {
+        // Extract the organization ID from the URL path parameters
+        // The `:id` in the path becomes available in `state.pathParameters`
+        final String organizationId = state.pathParameters['id'] ?? '';
+
+        return OrganizationProfilePage(organizationId: organizationId);
       },
     ),
   ],

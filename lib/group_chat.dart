@@ -129,7 +129,9 @@ class _GroupChatPageState extends State<GroupChatPage> {
         backgroundColor: colors.surface,
         foregroundColor: colors.onSurface,
         titleSpacing: 0,
+        centerTitle: true, // Center the title in the AppBar
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.center, // Center the row content
           children: <Widget>[
             // Small circular avatar with the first letter of the group name.
             // Uses primary color for modern, professional look
@@ -175,99 +177,110 @@ class _GroupChatPageState extends State<GroupChatPage> {
         ),
       ),
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            // Expanded message list takes up all available vertical space above
-            // the input bar at the bottom.
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                itemCount: _messages.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final _ChatMessage message = _messages[index];
-                  return _MessageBubble(message: message);
-                },
-              ),
-            ),
-
-            // Thin divider above the input bar for a subtle separation.
-            // Theme automatically applies subtle divider styling
-            Divider(height: 1, thickness: 1),
-
-            // Input bar that sits at the bottom (similar to iMessage).
-            // Uses theme surface color for consistency
-            Container(
-              color: colors.surface,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: SafeArea(
-                top: false,
-                child: Row(
-                  children: <Widget>[
-                    // Optional: small circular "plus" button (like iMessage)
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
-                      color:
-                          colors.onSurfaceVariant, // Use theme secondary color
-                      onPressed: () {
-                        // In a full app, you might open media / payments here.
-                      },
+        // For desktop apps, we center the chat content and constrain its width
+        child: Center(
+          child: ConstrainedBox(
+            // Max width prevents chat from stretching too wide on large desktop screens
+            // 800px is a good max width for chat readability
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Column(
+              children: <Widget>[
+                // Expanded message list takes up all available vertical space above
+                // the input bar at the bottom.
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    // Expanded text field so it takes as much space as possible.
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
+                    itemCount: _messages.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final _ChatMessage message = _messages[index];
+                      return _MessageBubble(message: message);
+                    },
+                  ),
+                ),
+
+                // Thin divider above the input bar for a subtle separation.
+                // Theme automatically applies subtle divider styling
+                Divider(height: 1, thickness: 1),
+
+                // Input bar that sits at the bottom (similar to iMessage).
+                // Uses theme surface color for consistency
+                Container(
+                  color: colors.surface,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: Row(
+                      children: <Widget>[
+                        // Optional: small circular "plus" button (like iMessage)
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
                           color: colors
-                              .surfaceVariant, // Use theme surface variant
-                          borderRadius: BorderRadius.circular(
-                            24,
-                          ), // More rounded for modern feel
+                              .onSurfaceVariant, // Use theme secondary color
+                          onPressed: () {
+                            // In a full app, you might open media / payments here.
+                          },
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: TextField(
-                          controller: _textController,
-                          focusNode: _inputFocusNode,
-                          minLines: 1,
-                          maxLines: 4,
-                          style: TextStyle(
-                            color: colors.onSurface, // Use theme text color
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Message',
-                            hintStyle: TextStyle(
-                              color: colors.onSurfaceVariant.withOpacity(
-                                0.6,
-                              ), // Subtle hint
+                        // Expanded text field so it takes as much space as possible.
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: colors
+                                  .surfaceVariant, // Use theme surface variant
+                              borderRadius: BorderRadius.circular(
+                                24,
+                              ), // More rounded for modern feel
                             ),
-                            border: InputBorder.none,
-                            contentPadding:
-                                EdgeInsets.zero, // Remove default padding
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: TextField(
+                              controller: _textController,
+                              focusNode: _inputFocusNode,
+                              minLines: 1,
+                              maxLines: 4,
+                              style: TextStyle(
+                                color: colors.onSurface, // Use theme text color
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Message',
+                                hintStyle: TextStyle(
+                                  color: colors.onSurfaceVariant.withOpacity(
+                                    0.6,
+                                  ), // Subtle hint
+                                ),
+                                border: InputBorder.none,
+                                contentPadding:
+                                    EdgeInsets.zero, // Remove default padding
+                              ),
+                              // Optionally send on "enter" if you want desktop chat
+                              // behavior. For now we only send when tapping the icon.
+                              onSubmitted: (_) => _handleSend(),
+                            ),
                           ),
-                          // Optionally send on "enter" if you want desktop chat
-                          // behavior. For now we only send when tapping the icon.
-                          onSubmitted: (_) => _handleSend(),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        // Send button using a filled icon for a Venmo/iMessage feel.
+                        // Uses primary color for modern, professional look
+                        IconButton(
+                          icon: const Icon(Icons.send_rounded),
+                          color: colors.primary, // Use theme primary color
+                          onPressed: _handleSend,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    // Send button using a filled icon for a Venmo/iMessage feel.
-                    // Uses primary color for modern, professional look
-                    IconButton(
-                      icon: const Icon(Icons.send_rounded),
-                      color: colors.primary, // Use theme primary color
-                      onPressed: _handleSend,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

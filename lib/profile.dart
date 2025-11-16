@@ -27,113 +27,122 @@ class ProfilePage extends StatelessWidget {
       body: SafeArea(
         // SingleChildScrollView allows the whole page to scroll on small screens.
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(
-              20.0,
-            ), // More padding for cleaner look
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _buildHeaderSection(context),
-                const SizedBox(
-                  height: 28,
-                ), // More spacing for cleaner hierarchy
-                _buildStatsRow(context),
-                const SizedBox(height: 28),
-                _buildPrimaryActions(context),
-                const SizedBox(height: 28),
-                _buildSectionCard(
-                  context,
-                  title: 'Account',
-                  subtitle:
-                      'Manage personal information, security and connected accounts.',
-                  children: [
-                    _ProfileTile(
-                      icon: Icons.person_outline,
-                      title: 'Personal information',
-                      subtitle: 'Name, email, phone',
-                      onTap: () {
-                        // TODO: Hook this up to a real screen or dialog.
-                      },
+          // For desktop apps, we center the content and constrain its width
+          child: Center(
+            child: ConstrainedBox(
+              // Max width prevents content from stretching too wide on large desktop screens
+              // 700px is a good max width for profile page readability
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: Padding(
+                padding: const EdgeInsets.all(
+                  20.0,
+                ), // More padding for cleaner look
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment
+                      .center, // Center all content horizontally
+                  children: <Widget>[
+                    _buildHeaderSection(context),
+                    const SizedBox(
+                      height: 28,
+                    ), // More spacing for cleaner hierarchy
+                    _buildStatsRow(context),
+                    const SizedBox(height: 28),
+                    _buildPrimaryActions(context),
+                    const SizedBox(height: 28),
+                    _buildSectionCard(
+                      context,
+                      title: 'Account',
+                      subtitle:
+                          'Manage personal information, security and connected accounts.',
+                      children: [
+                        _ProfileTile(
+                          icon: Icons.person_outline,
+                          title: 'Personal information',
+                          subtitle: 'Name, email, phone',
+                          onTap: () {
+                            // TODO: Hook this up to a real screen or dialog.
+                          },
+                        ),
+                        _ProfileTile(
+                          icon: Icons.lock_outline,
+                          title: 'Security',
+                          subtitle: 'Password, 2‑factor authentication',
+                          onTap: () {},
+                        ),
+                        _ProfileTile(
+                          icon: Icons.link,
+                          title: 'Connected accounts',
+                          subtitle: 'Google, Apple, social logins',
+                          onTap: () {},
+                        ),
+                      ],
                     ),
-                    _ProfileTile(
-                      icon: Icons.lock_outline,
-                      title: 'Security',
-                      subtitle: 'Password, 2‑factor authentication',
-                      onTap: () {},
+                    const SizedBox(height: 20), // More spacing between sections
+                    _buildSectionCard(
+                      context,
+                      title: 'Preferences',
+                      subtitle:
+                          'Control how the app behaves and how we talk to you.',
+                      children: [
+                        _ProfileTile(
+                          icon: Icons.notifications_outlined,
+                          title: 'Notifications',
+                          subtitle: 'Email, push & SMS alerts',
+                          onTap: () {},
+                        ),
+                        _ProfileTile(
+                          icon: Icons.palette_outlined,
+                          title: 'Appearance',
+                          subtitle: 'Theme, density',
+                          onTap: () {},
+                        ),
+                        _ProfileTile(
+                          icon: Icons.language_outlined,
+                          title: 'Language & region',
+                          subtitle: 'Localization settings',
+                          onTap: () {},
+                        ),
+                      ],
                     ),
-                    _ProfileTile(
-                      icon: Icons.link,
-                      title: 'Connected accounts',
-                      subtitle: 'Google, Apple, social logins',
-                      onTap: () {},
+                    const SizedBox(height: 20),
+                    _buildSectionCard(
+                      context,
+                      title: 'Support',
+                      subtitle: 'We are here to help whenever you need us.',
+                      children: [
+                        _ProfileTile(
+                          icon: Icons.help_outline,
+                          title: 'Help center',
+                          subtitle: 'FAQ and how‑to guides',
+                          onTap: () {},
+                        ),
+                        _ProfileTile(
+                          icon: Icons.mail_outline,
+                          title: 'Contact support',
+                          subtitle: 'Email our friendly team',
+                          onTap: () {},
+                        ),
+                        _ProfileTile(
+                          icon: Icons.description_outlined,
+                          title: 'Terms & privacy',
+                          subtitle: 'Legal information',
+                          onTap: () {},
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 32),
+                    Center(
+                      child: Text(
+                        'Demo profile • Connect real data here later',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24), // More bottom padding
                   ],
                 ),
-                const SizedBox(height: 20), // More spacing between sections
-                _buildSectionCard(
-                  context,
-                  title: 'Preferences',
-                  subtitle:
-                      'Control how the app behaves and how we talk to you.',
-                  children: [
-                    _ProfileTile(
-                      icon: Icons.notifications_outlined,
-                      title: 'Notifications',
-                      subtitle: 'Email, push & SMS alerts',
-                      onTap: () {},
-                    ),
-                    _ProfileTile(
-                      icon: Icons.palette_outlined,
-                      title: 'Appearance',
-                      subtitle: 'Theme, density',
-                      onTap: () {},
-                    ),
-                    _ProfileTile(
-                      icon: Icons.language_outlined,
-                      title: 'Language & region',
-                      subtitle: 'Localization settings',
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildSectionCard(
-                  context,
-                  title: 'Support',
-                  subtitle: 'We are here to help whenever you need us.',
-                  children: [
-                    _ProfileTile(
-                      icon: Icons.help_outline,
-                      title: 'Help center',
-                      subtitle: 'FAQ and how‑to guides',
-                      onTap: () {},
-                    ),
-                    _ProfileTile(
-                      icon: Icons.mail_outline,
-                      title: 'Contact support',
-                      subtitle: 'Email our friendly team',
-                      onTap: () {},
-                    ),
-                    _ProfileTile(
-                      icon: Icons.description_outlined,
-                      title: 'Terms & privacy',
-                      subtitle: 'Legal information',
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                Center(
-                  child: Text(
-                    'Demo profile • Connect real data here later',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24), // More bottom padding
-              ],
+              ),
             ),
           ),
         ),
@@ -148,52 +157,51 @@ class ProfilePage extends StatelessWidget {
   ///
   /// Extracting it into a separate method keeps `build()` easier to read.
   Widget _buildHeaderSection(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        // Avatar with a subtle background to make it stand out.
-        CircleAvatar(
-          radius: 36,
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Icon(
-            Icons.person,
-            size: 36,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
+    return Center(
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.center, // Center the header content
+        children: <Widget>[
+          // Avatar with a subtle background to make it stand out.
+          CircleAvatar(
+            radius: 36,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            child: Icon(
+              Icons.person,
+              size: 36,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // User name - bold, primary text
-              Text(
-                'Demo User',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.3, // Tighter spacing for modern feel
-                ),
-              ),
-              const SizedBox(height: 6), // More spacing
-              // Email - secondary text color
-              Text(
-                'demo.user@email.com',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+          const SizedBox(height: 16), // Vertical spacing instead of horizontal
+          // User name - bold, primary text - centered
+          Text(
+            'Demo User',
+            textAlign: TextAlign.center, // Center the text
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.3, // Tighter spacing for modern feel
+            ),
           ),
-        ),
-        // Small "Edit" icon button for quick access to profile editing.
-        IconButton(
-          icon: const Icon(Icons.edit_outlined),
-          tooltip: 'Edit profile',
-          onPressed: () {
-            // TODO: Implement navigation to edit profile screen.
-          },
-        ),
-      ],
+          const SizedBox(height: 6), // More spacing
+          // Email - secondary text color - centered
+          Text(
+            'demo.user@email.com',
+            textAlign: TextAlign.center, // Center the text
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12), // More spacing
+          // Small "Edit" icon button for quick access to profile editing.
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit profile',
+            onPressed: () {
+              // TODO: Implement navigation to edit profile screen.
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -201,42 +209,47 @@ class ProfilePage extends StatelessWidget {
   ///
   /// All numbers are placeholders for now – you can wire them up to real data.
   Widget _buildStatsRow(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: _ProfileStatCard(
-            label: 'Donations',
-            value: '24',
-            icon: Icons.volunteer_activism_outlined,
-            color: Theme.of(context).colorScheme.primary,
+    return Center(
+      child: Row(
+        mainAxisAlignment:
+            MainAxisAlignment.center, // Center the row horizontally
+        children: <Widget>[
+          Expanded(
+            child: _ProfileStatCard(
+              label: 'Donations',
+              value: '24',
+              icon: Icons.volunteer_activism_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _ProfileStatCard(
-            label: 'Organizations',
-            value: '6',
-            icon: Icons.apartment_outlined,
-            color: Theme.of(context).colorScheme.secondary,
+          const SizedBox(width: 12),
+          Expanded(
+            child: _ProfileStatCard(
+              label: 'Organizations',
+              value: '6',
+              icon: Icons.apartment_outlined,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _ProfileStatCard(
-            label: 'Impact score',
-            value: '82',
-            icon: Icons.auto_graph_outlined,
-            color: Theme.of(context).colorScheme.tertiary,
+          const SizedBox(width: 12),
+          Expanded(
+            child: _ProfileStatCard(
+              label: 'Impact score',
+              value: '82',
+              icon: Icons.auto_graph_outlined,
+              color: Theme.of(context).colorScheme.tertiary,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   /// Primary action buttons for common tasks on a profile screen.
   Widget _buildPrimaryActions(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment:
+          CrossAxisAlignment.center, // Center the buttons horizontally
       children: <Widget>[
         // ElevatedButton is good for the "main" action.
         // Theme automatically applies modern, rounded button styling
@@ -306,23 +319,30 @@ class ProfilePage extends StatelessWidget {
           vertical: 16.0,
         ), // More padding
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              CrossAxisAlignment.center, // Center all content horizontally
           children: <Widget>[
-            // Section title - bold, primary text
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.2, // Tighter spacing for modern feel
+            // Section title - bold, primary text - centered
+            Center(
+              child: Text(
+                title,
+                textAlign: TextAlign.center, // Center the text
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2, // Tighter spacing for modern feel
+                ),
               ),
             ),
             const SizedBox(height: 6), // More spacing
-            // Section subtitle - secondary text color
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color:
-                    colors.onSurfaceVariant, // Use theme secondary text color
+            // Section subtitle - secondary text color - centered
+            Center(
+              child: Text(
+                subtitle,
+                textAlign: TextAlign.center, // Center the text
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color:
+                      colors.onSurfaceVariant, // Use theme secondary text color
+                ),
               ),
             ),
             const SizedBox(height: 16), // More spacing before children
