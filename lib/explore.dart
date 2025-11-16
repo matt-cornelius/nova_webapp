@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'demo_data/organizations.dart';
 import 'main_nav_bar.dart';
+import 'widgets/organization_image.dart';
 
 /// EXPLORE / SEARCH PAGE (Spotify‑style)
 /// ------------------------------------
@@ -24,22 +25,27 @@ class _ExplorePageState extends State<ExplorePage> {
 
   /// A simple list of "trending events" to show in cards.
   /// In a real app these would probably come from an API.
+  /// Each event includes a title, subtitle, and optional image asset path.
   final List<Map<String, String>> _trendingEvents = <Map<String, String>>[
     <String, String>{
       'title': 'Climate Action Summit',
       'subtitle': 'Global online event · This week',
+      'image': 'assets/climate_action_submit_360.png', // Asset image for this event
     },
     <String, String>{
       'title': 'Hack For Good',
       'subtitle': 'Developer fundraiser · Tomorrow',
+      'image': 'assets/hack_4_good_360.png', // Asset image for this event
     },
     <String, String>{
       'title': 'Community Tree Planting',
       'subtitle': 'Local meetup · Saturday',
+      'image': 'assets/community_tree_planting_360.png', // Asset image for this event
     },
     <String, String>{
       'title': 'Clean Water Challenge',
       'subtitle': 'Run / Walk · Next month',
+      'image': 'assets/clean_water_challenge_360.png', // Asset image for this event
     },
   ];
 
@@ -69,24 +75,39 @@ class _ExplorePageState extends State<ExplorePage> {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // AppBar automatically uses theme - clean and modern
+      // Venmo/Spotify style with colorful background
+      backgroundColor: colors.surfaceVariant, // More colorful background, less white
       appBar: AppBar(
         title: const Text('Search'),
         centerTitle: true, // Center the title in the AppBar
+        elevation: 0, // Flat design
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          // `SingleChildScrollView` allows the whole content to scroll together.
-          // For desktop apps, we center the content and constrain its width
-          child: Center(
-            child: ConstrainedBox(
-              // Max width prevents content from stretching too wide on large desktop screens
-              // 900px is good for explore page with grid layout
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: Padding(
-                padding: const EdgeInsets.all(
-                  20.0,
-                ), // More padding for cleaner look
+      body: Container(
+        // Add gradient background for more color (Venmo/Spotify style)
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.primaryContainer.withOpacity(0.4),
+              colors.secondaryContainer.withOpacity(0.3),
+              colors.tertiaryContainer.withOpacity(0.2),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            // `SingleChildScrollView` allows the whole content to scroll together.
+            // For desktop apps, we center the content and constrain its width
+            child: Center(
+              child: ConstrainedBox(
+                // Max width prevents content from stretching too wide on large desktop screens
+                // 900px is good for explore page with grid layout
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: Padding(
+                  padding: const EdgeInsets.all(
+                    24.0,
+                  ), // More padding for cleaner look
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment
                       .center, // Center all content horizontally
@@ -189,37 +210,41 @@ class _ExplorePageState extends State<ExplorePage> {
                             final Organization org =
                                 _getFilteredOrganizations()[index];
                             return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: ListTile(
-                                // Organization logo/icon
-                                leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    org.logoUrl,
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (
-                                          BuildContext context,
-                                          Object error,
-                                          StackTrace? stackTrace,
-                                        ) {
-                                          return Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              color: colors.primaryContainer,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Icon(
-                                              Icons.business,
-                                              color: colors.onPrimaryContainer,
-                                            ),
-                                          );
-                                        },
+                              // Venmo/Spotify style colorful card
+                              elevation: 0, // No shadow
+                              color: colors.surface, // Card background
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20), // More rounded
+                                side: BorderSide(
+                                  color: colors.primary.withOpacity(0.3), // Colored border
+                                  width: 1.5,
+                                ),
+                              ),
+                              margin: const EdgeInsets.only(bottom: 16), // More spacing
+                              child: Container(
+                                // Add subtle gradient overlay for more color depth
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: <Color>[
+                                      colors.surface,
+                                      colors.surface.withOpacity(0.95),
+                                      colors.primaryContainer.withOpacity(0.1),
+                                    ],
                                   ),
+                                ),
+                                child: ListTile(
+                                // Organization logo/icon
+                                // Uses OrganizationImage helper widget which handles
+                                // both asset images and network images automatically
+                                leading: OrganizationImage(
+                                  imageUrl: org.logoUrl,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 // Organization name
                                 title: Row(
@@ -270,12 +295,13 @@ class _ExplorePageState extends State<ExplorePage> {
                                 onTap: () {
                                   context.push('/organization/${org.id}');
                                 },
-                                // Trailing arrow to indicate it's clickable
+                                // Trailing arrow in primary color for more vibrancy
                                 trailing: Icon(
                                   Icons.chevron_right,
-                                  color: colors.onSurfaceVariant,
+                                  color: colors.primary,
                                 ),
                               ),
+                            ),
                             );
                           },
                         ),
@@ -312,43 +338,50 @@ class _ExplorePageState extends State<ExplorePage> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         children: <Widget>[
-                          // Organization cards - now clickable and navigate to profiles
-                          // Map organization names to their IDs for navigation
-                          _TrendingCard(
-                            title: 'Clean Water Now',
-                            subtitle: 'Health · Uganda',
-                            color: Colors.blue.shade400,
-                            organizationId:
-                                'org_clean_water', // Link to actual organization
-                          ),
-                          _TrendingCard(
-                            title: 'Code For Kids',
-                            subtitle: 'Education · US',
-                            color: Colors.purple.shade400,
-                            organizationId: 'org_coding_kids',
-                          ),
-                          _TrendingCard(
-                            title: 'Urban Tree Alliance',
-                            subtitle: 'Environment · Brazil',
-                            color: Colors.green.shade400,
-                            organizationId: 'org_tree_alliance',
-                          ),
-                          _TrendingCard(
-                            title: 'Rapid Relief Fund',
-                            subtitle: 'Emergency · Global',
-                            color: Colors.red.shade400,
-                            organizationId: 'org_emergency_relief',
+                          // Organization cards - dynamically generated from all organizations
+                          // Each card is clickable and navigates to the organization profile
+                          // We use a predefined list of colors that cycle through for variety
+                          ...demoOrganizations.asMap().entries.map(
+                            (MapEntry<int, Organization> entry) {
+                              final int index = entry.key;
+                              final Organization org = entry.value;
+                              // Cycle through different colors for visual variety
+                              // Using modulo to repeat colors if we have more orgs than colors
+                              final List<Color> colorPalette = <Color>[
+                                Colors.blue.shade400,
+                                Colors.purple.shade400,
+                                Colors.green.shade400,
+                                Colors.red.shade400,
+                                Colors.orange.shade400,
+                                Colors.teal.shade400,
+                                Colors.pink.shade400,
+                                Colors.indigo.shade400,
+                                Colors.cyan.shade400,
+                                Colors.amber.shade400,
+                              ];
+                              final Color cardColor =
+                                  colorPalette[index % colorPalette.length];
+                              return _TrendingCard(
+                                title: org.name,
+                                subtitle: '${org.category} · ${org.country}',
+                                color: cardColor,
+                                organizationId: org.id, // Link to actual organization
+                                imageUrl: org.logoUrl, // Use organization logo as background
+                              );
+                            },
                           ),
                           // And then cards that represent time‑bound events.
                           // These don't link to organizations (they're events)
+                          // Each event card displays its associated image asset
                           for (final Map<String, String> event
                               in _trendingEvents)
                             _TrendingCard(
                               title: event['title'] ?? '',
                               subtitle: event['subtitle'] ?? '',
-                              color: Colors.orange.shade400,
+                              color: Colors.deepOrange.shade400,
                               organizationId:
                                   null, // Events don't have organization IDs
+                              imageUrl: event['image'], // Display event image asset
                             ),
                         ],
                       ),
@@ -358,6 +391,7 @@ class _ExplorePageState extends State<ExplorePage> {
               ),
             ),
           ),
+        ),
         ),
       ),
       // Index mapping after adding the Groups tab:
@@ -370,18 +404,22 @@ class _ExplorePageState extends State<ExplorePage> {
 /// Simple reusable widget for a colorful "category" style card,
 /// similar to the tiles you see on Spotify's search screen.
 /// Now supports navigation to organization profiles when an organizationId is provided.
+/// Also supports displaying images for events when an imageUrl is provided.
 class _TrendingCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final Color color;
   final String?
   organizationId; // Optional: if provided, card navigates to org profile
+  final String?
+  imageUrl; // Optional: if provided, displays an image on the card (for events)
 
   const _TrendingCard({
     required this.title,
     required this.subtitle,
     required this.color,
     this.organizationId, // Can be null for events that aren't organizations
+    this.imageUrl, // Can be null if no image is available
   });
 
   @override
@@ -399,42 +437,96 @@ class _TrendingCard extends StatelessWidget {
         // Events can be tapped but no action needed for now
       },
       child: Container(
+        // More rounded corners for modern, friendly look
         decoration: BoxDecoration(
-          color: color,
-          // More rounded corners for modern, friendly look
           borderRadius: BorderRadius.circular(20),
           // Subtle shadow for depth (like Spotify cards)
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
+              color: (imageUrl != null ? Colors.black : color).withOpacity(0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        // More padding for cleaner, more spacious look
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.3, // Tighter spacing for modern feel
+        // Clip the container to ensure rounded corners work with the image
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            // Stack allows us to layer the image behind the text with overlay
+            fit: StackFit.expand,
+            children: <Widget>[
+              // Background image - fills the entire card
+              if (imageUrl != null)
+                // Use OrganizationImage helper which handles both assets and network images
+                OrganizationImage(
+                  imageUrl: imageUrl!,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover, // Cover the entire card with the image
+                )
+              else
+                // Fallback to solid color if no image is provided
+                Container(
+                  color: color,
+                ),
+              // Gradient overlay to ensure text is readable over the image
+              // Dark gradient from bottom to top for better text contrast
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[
+                      // More transparent at top, darker at bottom for text readability
+                      Colors.black.withOpacity(0.3),
+                      Colors.black.withOpacity(0.7),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withOpacity(
-                  0.9,
-                ), // Slightly more opaque for better readability
+              // Content (title and subtitle) positioned at the bottom
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end, // Align content to bottom
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.3, // Tighter spacing for modern feel
+                        shadows: <Shadow>[
+                          // Text shadow for better readability over images
+                          Shadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.95),
+                        shadows: <Shadow>[
+                          // Text shadow for better readability over images
+                          Shadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

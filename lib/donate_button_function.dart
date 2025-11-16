@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
 
 import 'demo_data/organizations.dart';
@@ -146,59 +145,13 @@ Future<DonationResponse> submitDonation({
       ...?headers,
     };
 
-    // Debug logging: Log request details
-    developer.log(
-      '=== HTTP POST REQUEST ===',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'URL: $url',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'Headers: $requestHeaders',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'Request Body: $requestBody',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'Sending POST request...',
-      name: 'submitDonation',
-    );
-
     // Make the HTTP POST request
     // POST is used because we're sending data to create a new donation
     // Uri.parse converts the string URL into a Uri object
-    final DateTime requestStartTime = DateTime.now();
     final http.Response response = await http.post(
       Uri.parse(url),
       headers: requestHeaders,
       body: requestBody,
-    );
-    final Duration requestDuration = DateTime.now().difference(requestStartTime);
-
-    // Debug logging: Log response details
-    developer.log(
-      '=== HTTP POST RESPONSE ===',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'Status Code: ${response.statusCode}',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'Response Headers: ${response.headers}',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'Response Body: ${response.body}',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'Request Duration: ${requestDuration.inMilliseconds}ms',
-      name: 'submitDonation',
     );
 
     // Check if the request was successful (status codes 200-299)
@@ -209,43 +162,22 @@ Future<DonationResponse> submitDonation({
     if (response.statusCode >= 200 && response.statusCode < 300) {
       // Success! Parse the response JSON
       // jsonDecode converts the JSON string back into Dart objects
-      developer.log(
-        'Request successful! Parsing response...',
-        name: 'submitDonation',
-      );
       final Map<String, dynamic> responseData = jsonDecode(response.body) as Map<String, dynamic>;
 
       // Create and return a DonationResponse from the parsed data
-      final DonationResponse donationResponse = DonationResponse.fromJson(responseData);
-      developer.log(
-        'Parsed Response: success=${donationResponse.success}, message=${donationResponse.message}, donationId=${donationResponse.donationId}',
-        name: 'submitDonation',
-      );
-      return donationResponse;
+      return DonationResponse.fromJson(responseData);
     } else {
       // Request failed - server returned an error status code
       // Try to parse error message from response, or use default message
-      developer.log(
-        'Request failed with status ${response.statusCode}',
-        name: 'submitDonation',
-      );
       String errorMessage = 'Donation request failed';
       try {
         final Map<String, dynamic> errorData = jsonDecode(response.body) as Map<String, dynamic>;
         errorMessage = errorData['error'] as String? ??
             errorData['message'] as String? ??
             'Server returned status ${response.statusCode}';
-        developer.log(
-          'Parsed error message: $errorMessage',
-          name: 'submitDonation',
-        );
-      } catch (e) {
+      } catch (_) {
         // If response body isn't valid JSON, use the status code message
         errorMessage = 'Server returned status ${response.statusCode}';
-        developer.log(
-          'Could not parse error response as JSON: $e',
-          name: 'submitDonation',
-        );
       }
 
       // Throw an exception with the error details
@@ -254,48 +186,16 @@ Future<DonationResponse> submitDonation({
   } on http.ClientException catch (e) {
     // Network error - couldn't reach the server
     // This happens when there's no internet, wrong URL, or server is down
-    developer.log(
-      '=== NETWORK ERROR ===',
-      name: 'submitDonation',
-      error: e,
-    );
-    developer.log(
-      'Network error details: ${e.message}',
-      name: 'submitDonation',
-    );
     throw DonationApiException(
       'Network error: ${e.message}',
     );
   } on FormatException catch (e) {
     // JSON parsing error - response wasn't valid JSON
-    developer.log(
-      '=== JSON PARSING ERROR ===',
-      name: 'submitDonation',
-      error: e,
-    );
-    developer.log(
-      'JSON parsing error: ${e.message}',
-      name: 'submitDonation',
-    );
     throw DonationApiException(
       'Invalid response format: ${e.message}',
     );
-  } catch (e, stackTrace) {
+  } catch (e) {
     // Catch any other unexpected errors
-    developer.log(
-      '=== UNEXPECTED ERROR ===',
-      name: 'submitDonation',
-      error: e,
-      stackTrace: stackTrace,
-    );
-    developer.log(
-      'Unexpected error type: ${e.runtimeType}',
-      name: 'submitDonation',
-    );
-    developer.log(
-      'Unexpected error details: $e',
-      name: 'submitDonation',
-    );
     throw DonationApiException(
       'Unexpected error: ${e.toString()}',
     );

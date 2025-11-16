@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'demo_data/organizations.dart';
 import 'demo_data/donations_demo.dart';
 import 'donation_dialog.dart';
+import 'widgets/organization_image.dart';
 
 /// ORGANIZATION PROFILE PAGE
 /// -------------------------
@@ -84,412 +85,478 @@ class OrganizationProfilePage extends StatelessWidget {
     final List<Donation> topDonations = organizationDonations.take(5).toList();
 
     return Scaffold(
-      appBar: AppBar(title: Text(organization.name), centerTitle: true),
-      body: SingleChildScrollView(
-        // For desktop apps, we center the content and constrain its width
-        child: Center(
-          child: ConstrainedBox(
-            // Max width prevents content from stretching too wide on large desktop screens
-            // 800px is a good max width for organization profile readability
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment
-                    .center, // Center all content horizontally
-                children: <Widget>[
-                  /// ORGANIZATION HEADER SECTION
-                  /// ---------------------------
-                  /// Shows the organization logo, name, tagline, and verification badge
-                  // Centered header with logo and info stacked vertically for cleaner look
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      // Organization logo - centered
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.network(
-                          organization.logoUrl,
+      // Venmo/Spotify style with colorful background
+      backgroundColor:
+          colors.surfaceVariant, // More colorful background, less white
+      appBar: AppBar(
+        title: Text(organization.name),
+        centerTitle: true,
+        elevation: 0, // Flat design
+      ),
+      body: Container(
+        // Add gradient background for more color (Venmo/Spotify style)
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.primaryContainer.withOpacity(0.4),
+              colors.secondaryContainer.withOpacity(0.3),
+              colors.tertiaryContainer.withOpacity(0.2),
+            ],
+          ),
+        ),
+        child: SingleChildScrollView(
+          // For desktop apps, we center the content and constrain its width
+          child: Center(
+            child: ConstrainedBox(
+              // Max width prevents content from stretching too wide on large desktop screens
+              // 800px is a good max width for organization profile readability
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment
+                      .center, // Center all content horizontally
+                  children: <Widget>[
+                    /// ORGANIZATION HEADER SECTION
+                    /// ---------------------------
+                    /// Shows the organization logo, name, tagline, and verification badge
+                    // Centered header with logo and info stacked vertically for cleaner look
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        // Organization logo - centered
+                        // Uses OrganizationImage helper widget which handles
+                        // both asset images and network images automatically
+                        OrganizationImage(
+                          imageUrl: organization.logoUrl,
                           width:
                               120, // Slightly larger for better visual impact
                           height: 120,
                           fit: BoxFit.cover,
-                          errorBuilder:
-                              (
-                                BuildContext context,
-                                Object error,
-                                StackTrace? stackTrace,
-                              ) {
-                                // Fallback if image fails to load
-                                return Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    color: colors.primaryContainer,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Icon(
-                                    Icons.business,
-                                    size: 60,
-                                    color: colors.onPrimaryContainer,
-                                  ),
-                                );
-                              },
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ), // More spacing for cleaner look
-                      // Organization name with verification badge - centered
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            organization.name,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineSmall
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          if (organization.isVerified) ...[
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.verified,
-                              color: colors.primary,
-                              size: 24, // Slightly larger for better visibility
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Tagline - short description, centered
-                      Text(
-                        organization.tagline,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 32,
-                  ), // More spacing for cleaner separation
-                  /// LOCATION INFORMATION
-                  /// ---------------------
-                  /// Displays city and country where the organization is based
-                  // Centered location info
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(Icons.location_on, color: colors.primary, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${organization.city}, ${organization.country}',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 32,
-                  ), // More spacing for cleaner separation
-                  /// DESCRIPTION SECTION
-                  /// -------------------
-                  /// Shows the full mission statement/description
-                  // Centered "About" title
-                  Center(
-                    child: Text(
-                      'About',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16), // More spacing
-                  // Centered description text
-                  Text(
-                    organization.description,
-                    textAlign: TextAlign.center, // Center the description text
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height:
-                          1.6, // Slightly increased line height for better readability
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 32,
-                  ), // More spacing for cleaner separation
-                  /// STATISTICS SECTION
-                  /// ------------------
-                  /// Shows total received, supporters count, and category
-                  // Statistics container with centered content
-                  Container(
-                    padding: const EdgeInsets.all(
-                      20,
-                    ), // More padding for cleaner look
-                    decoration: BoxDecoration(
-                      color: colors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(
-                        16,
-                      ), // More rounded for modern look
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        // Total received
-                        Column(
+                        const SizedBox(
+                          height: 20,
+                        ), // More spacing for cleaner look
+                        // Organization name with verification badge - centered
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              '\$${organization.totalReceivedUsd.toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colors.primary,
-                                  ),
+                              organization.name,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Total Raised',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: colors.onSurfaceVariant),
-                            ),
+                            if (organization.isVerified) ...[
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.verified,
+                                color: colors.primary,
+                                size:
+                                    24, // Slightly larger for better visibility
+                              ),
+                            ],
                           ],
                         ),
-                        // Supporters count
-                        Column(
-                          children: <Widget>[
-                            Text(
-                              organization.supportersCount.toString(),
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colors.primary,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Supporters',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: colors.onSurfaceVariant),
-                            ),
-                          ],
-                        ),
-                        // Category
-                        Column(
-                          children: <Widget>[
-                            Text(
-                              organization.category,
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colors.primary,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Category',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: colors.onSurfaceVariant),
-                            ),
-                          ],
+                        const SizedBox(height: 12),
+                        // Tagline - short description, centered
+                        Text(
+                          organization.tagline,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(color: colors.onSurfaceVariant),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(
-                    height: 32,
-                  ), // More spacing for cleaner separation
-                  /// DONATION BUTTON
-                  /// ----------------
-                  /// Primary call-to-action button to donate to this organization
-                  // Constrained width button for better desktop UX
-                  SizedBox(
-                    width: double.infinity, // Full width within constraints
-                    height: 56, // Taller button for better touch target
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Show the donation dialog when user taps "Donate Now"
-                        // This opens a clean, Venmo-style pop-up for making donations
-                        // We use ! because we know organization is not null at this point
-                        // (there's an early return if it's null earlier in the build method)
-                        showDialog<void>(
-                          context: context,
-                          builder: (BuildContext dialogContext) {
-                            return DonationDialog(
-                              organization: organization!,
-                            );
-                          },
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        // Use primary color for the button
-                        backgroundColor: colors.primary,
-                        foregroundColor: colors.onPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    const SizedBox(
+                      height: 32,
+                    ), // More spacing for cleaner separation
+                    /// LOCATION INFORMATION
+                    /// ---------------------
+                    /// Displays city and country where the organization is based
+                    // Centered location info
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.location_on,
+                          color: colors.primary,
+                          size: 20,
                         ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          const Icon(Icons.favorite),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Donate Now',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${organization.city}, ${organization.country}',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(
-                    height: 32,
-                  ), // More spacing for cleaner separation
-                  /// DONATION LEADERBOARD SECTION
-                  /// -----------------------------
-                  /// Shows the top 5 largest recent donations to this organization
-                  if (topDonations.isNotEmpty) ...<Widget>[
-                    // Centered "Recent Top Donations" title
+                    const SizedBox(
+                      height: 32,
+                    ), // More spacing for cleaner separation
+                    /// DESCRIPTION SECTION
+                    /// -------------------
+                    /// Shows the full mission statement/description
+                    // Centered "About" title
                     Center(
                       child: Text(
-                        'Recent Top Donations',
+                        'About',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20), // More spacing before list
-                    // List of top donations - centered with constrained width
-                    ...topDonations.asMap().entries.map((
-                      MapEntry<int, Donation> entry,
-                    ) {
-                      final int index = entry.key;
-                      final Donation donation = entry.value;
-                      final IndividualAccount? donor = donation.fromIndividual;
-
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
+                    const SizedBox(height: 16), // More spacing
+                    // Centered description text
+                    Text(
+                      organization.description,
+                      textAlign:
+                          TextAlign.center, // Center the description text
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        height:
+                            1.6, // Slightly increased line height for better readability
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 32,
+                    ), // More spacing for cleaner separation
+                    /// STATISTICS SECTION
+                    /// ------------------
+                    /// Shows total received, supporters count, and category
+                    // Statistics container with centered content - Venmo/Spotify colorful style
+                    Container(
+                      padding: const EdgeInsets.all(
+                        20,
+                      ), // More padding for cleaner look
+                      decoration: BoxDecoration(
+                        // Colorful gradient background (Venmo/Spotify style)
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: <Color>[
+                            colors.primaryContainer.withOpacity(0.5),
+                            colors.secondaryContainer.withOpacity(0.4),
+                            colors.tertiaryContainer.withOpacity(0.3),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          20,
+                        ), // More rounded for Venmo/Spotify feel
+                        border: Border.all(
+                          color: colors.primary.withOpacity(0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          // Total received
+                          Column(
                             children: <Widget>[
-                              // Rank indicator (1st, 2nd, 3rd, etc.)
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: index < 3
-                                      ? colors.primaryContainer
-                                      : colors.surfaceVariant,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: index < 3
-                                          ? colors.onPrimaryContainer
-                                          : colors.onSurfaceVariant,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              // Donor avatar
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: colors.primaryContainer,
-                                child: Text(
-                                  donor?.fullName
-                                          .substring(0, 1)
-                                          .toUpperCase() ??
-                                      '?',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: colors.onPrimaryContainer,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              // Donor name and amount
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      donor?.fullName ?? 'Anonymous',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _formatRelativeTime(donation.createdAt),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: colors.onSurfaceVariant,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Donation amount - highlighted
                               Text(
-                                '\$${donation.amountUsd.toStringAsFixed(2)}',
+                                '\$${organization.totalReceivedUsd.toStringAsFixed(0)}',
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: colors.primary,
                                     ),
                               ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Total Raised',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: colors.onSurfaceVariant),
+                              ),
                             ],
                           ),
-                        ),
-                      );
-                    }),
-                  ] else ...<Widget>[
-                    // Show message if no donations yet - centered
-                    Container(
-                      padding: const EdgeInsets.all(
-                        32,
-                      ), // More padding for cleaner look
-                      decoration: BoxDecoration(
-                        color: colors.surfaceVariant,
-                        borderRadius: BorderRadius.circular(
-                          16,
-                        ), // More rounded for modern look
+                          // Supporters count
+                          Column(
+                            children: <Widget>[
+                              Text(
+                                organization.supportersCount.toString(),
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: colors.primary,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Supporters',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: colors.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                          // Category
+                          Column(
+                            children: <Widget>[
+                              Text(
+                                organization.category,
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: colors.primary,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Category',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: colors.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      child: Center(
-                        child: Column(
+                    ),
+                    const SizedBox(
+                      height: 32,
+                    ), // More spacing for cleaner separation
+                    /// DONATION BUTTON
+                    /// ----------------
+                    /// Primary call-to-action button to donate to this organization
+                    // Constrained width button for better desktop UX
+                    SizedBox(
+                      width: double.infinity, // Full width within constraints
+                      height: 56, // Taller button for better touch target
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Show the donation dialog when user taps "Donate Now"
+                          // This opens a clean, Venmo-style pop-up for making donations
+                          // We use ! because we know organization is not null at this point
+                          // (there's an early return if it's null earlier in the build method)
+                          showDialog<void>(
+                            context: context,
+                            builder: (BuildContext dialogContext) {
+                              return DonationDialog(
+                                organization: organization!,
+                              );
+                            },
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          // Use primary color for the button
+                          backgroundColor: colors.primary,
+                          foregroundColor: colors.onPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Icon(
-                              Icons.volunteer_activism,
-                              size:
-                                  56, // Slightly larger for better visual impact
-                              color: colors.onSurfaceVariant,
-                            ),
-                            const SizedBox(height: 20), // More spacing
+                            const Icon(Icons.favorite),
+                            const SizedBox(width: 8),
                             Text(
-                              'Be the first to donate!',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.titleMedium,
+                              'Donate Now',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
                       ),
                     ),
+                    const SizedBox(
+                      height: 32,
+                    ), // More spacing for cleaner separation
+                    /// DONATION LEADERBOARD SECTION
+                    /// -----------------------------
+                    /// Shows the top 5 largest recent donations to this organization
+                    if (topDonations.isNotEmpty) ...<Widget>[
+                      // Centered "Recent Top Donations" title
+                      Center(
+                        child: Text(
+                          'Recent Top Donations',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: 20), // More spacing before list
+                      // List of top donations - centered with constrained width
+                      ...topDonations.asMap().entries.map((
+                        MapEntry<int, Donation> entry,
+                      ) {
+                        final int index = entry.key;
+                        final Donation donation = entry.value;
+                        final IndividualAccount? donor =
+                            donation.fromIndividual;
+
+                        return Card(
+                          // Venmo/Spotify style colorful card
+                          elevation: 0, // No shadow
+                          color: colors.surface, // Card background
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              20,
+                            ), // More rounded
+                            side: BorderSide(
+                              color: colors.primary.withOpacity(
+                                0.3,
+                              ), // Colored border
+                              width: 1.5,
+                            ),
+                          ),
+                          margin: const EdgeInsets.only(
+                            bottom: 16,
+                          ), // More spacing
+                          child: Container(
+                            // Add subtle gradient overlay for more color depth
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: <Color>[
+                                  colors.surface,
+                                  colors.surface.withOpacity(0.95),
+                                  colors.primaryContainer.withOpacity(0.1),
+                                ],
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: <Widget>[
+                                  // Rank indicator (1st, 2nd, 3rd, etc.)
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: index < 3
+                                          ? colors.primaryContainer
+                                          : colors.surfaceVariant,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${index + 1}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: index < 3
+                                              ? colors.onPrimaryContainer
+                                              : colors.onSurfaceVariant,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  // Donor avatar
+                                  CircleAvatar(
+                                    radius: 24,
+                                    backgroundColor: colors.primaryContainer,
+                                    child: Text(
+                                      donor?.fullName
+                                              .substring(0, 1)
+                                              .toUpperCase() ??
+                                          '?',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: colors.onPrimaryContainer,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  // Donor name and amount
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Text(
+                                          donor?.fullName ?? 'Anonymous',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _formatRelativeTime(
+                                            donation.createdAt,
+                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: colors.onSurfaceVariant,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Donation amount - highlighted
+                                  Text(
+                                    '\$${donation.amountUsd.toStringAsFixed(2)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: colors.primary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ] else ...<Widget>[
+                      // Show message if no donations yet - centered - Venmo/Spotify colorful style
+                      Container(
+                        padding: const EdgeInsets.all(
+                          32,
+                        ), // More padding for cleaner look
+                        decoration: BoxDecoration(
+                          // Colorful gradient background (Venmo/Spotify style)
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                              colors.primaryContainer.withOpacity(0.4),
+                              colors.secondaryContainer.withOpacity(0.3),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(
+                            20,
+                          ), // More rounded for Venmo/Spotify feel
+                          border: Border.all(
+                            color: colors.primary.withOpacity(0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Center(
+                          child: Column(
+                            children: <Widget>[
+                              Icon(
+                                Icons.volunteer_activism,
+                                size:
+                                    56, // Slightly larger for better visual impact
+                                color: colors.onSurfaceVariant,
+                              ),
+                              const SizedBox(height: 20), // More spacing
+                              Text(
+                                'Be the first to donate!',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

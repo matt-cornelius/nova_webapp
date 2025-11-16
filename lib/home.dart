@@ -1,10 +1,10 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'demo_data/donations_demo.dart';
 import 'donations_provider.dart';
 import 'main_nav_bar.dart';
+import 'widgets/organization_image.dart';
 
 /// HOME PAGE
 /// ---------
@@ -35,73 +35,48 @@ class _HomePageState extends State<HomePage> {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // AppBar automatically uses our theme settings for clean, modern look
-      appBar: AppBar(
-        title: const Text('Home'),
-        centerTitle: true, // Center the title in the AppBar
-      ),
-      // `body` is the main content area of the screen.
-      // For desktop apps, we center the content and constrain its width
-      body: Center(
-        child: ConstrainedBox(
-          // Max width prevents content from stretching too wide on large desktop screens
-          // 800px is a good max width for desktop readability
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Padding(
-            padding: const EdgeInsets.all(
-              20.0,
-            ), // Slightly more padding for cleaner spacing
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.center, // Center all content horizontally
-              children: <Widget>[
-                // Welcome header with modern typography - centered
-                Center(
-                  child: Text(
-                    'Welcome back 👋',
-                    textAlign: TextAlign.center, // Center the text
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5, // Tighter spacing for modern feel
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12), // More space for cleaner look
-                // Subtitle with secondary text color for hierarchy - centered
-                Center(
-                  child: Text(
-                    'Here are the latest donations happening on the platform.',
-                    textAlign: TextAlign.center, // Center the text
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colors
-                          .onSurfaceVariant, // Use theme color for secondary text
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24), // More space before cards
-                Expanded(
-                  // `ListView.builder` lazily builds only the visible cards,
-                  // which is good practice even for small lists.
-                  child: ListView.builder(
-                    itemCount: donations.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Donation donation = donations[index];
-                      return _DonationCard(
-                        donation: donation,
-                        isLiked: _provider.isLiked(donation.id),
-                        onToggleLike: () {
-                          // We tell the provider to toggle the like state, then
-                          // call `setState` to trigger a rebuild so the UI updates.
-                          _provider.toggleLike(donation.id);
-                          setState(() {});
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
+      // Venmo/Spotify style with colorful background
+      backgroundColor: colors.surfaceVariant, // More colorful background, less white
+      body: Container(
+        // Add gradient background for more color (Venmo/Spotify style)
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.primaryContainer.withOpacity(0.4),
+              colors.secondaryContainer.withOpacity(0.3),
+              colors.tertiaryContainer.withOpacity(0.2),
+            ],
+          ),
+        ),
+        child: Center(
+          child: ConstrainedBox(
+            // Max width prevents content from stretching too wide on large desktop screens
+            // 800px is good for desktop readability with cards
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0), // Proper desktop padding
+              child: ListView.builder(
+              // `ListView.builder` lazily builds only the visible cards,
+              // which is good practice even for small lists.
+              itemCount: donations.length,
+              itemBuilder: (BuildContext context, int index) {
+                final Donation donation = donations[index];
+                return _DonationCard(
+                  donation: donation,
+                  isLiked: _provider.isLiked(donation.id),
+                  onToggleLike: () {
+                    // We tell the provider to toggle the like state, then
+                    // call `setState` to trigger a rebuild so the UI updates.
+                    _provider.toggleLike(donation.id);
+                    setState(() {});
+                  },
+                );
+              },
             ),
           ),
+        ),
         ),
       ),
       // Our custom bottom navigation bar shared across main pages.
@@ -150,33 +125,40 @@ class _DonationCard extends StatelessWidget {
     // Get theme colors for consistent styling throughout the card
     final ColorScheme colors = Theme.of(context).colorScheme;
 
+    // Venmo/Spotify style colorful cards
     return Card(
-      // Card automatically uses theme settings - clean, modern look
-      // No elevation needed - we use border instead for flat design
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      // Theme already sets rounded corners and border, but we keep it explicit
-      child: Padding(
-        padding: const EdgeInsets.all(18.0), // More padding for cleaner look
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // Left side: circular avatar with the first letter of the donor.
-            // Using primary color with opacity for modern, professional look
-            CircleAvatar(
-              radius: 24, // Slightly larger for better visual weight
-              backgroundColor: colors.primaryContainer,
-              child: Text(
-                donorName.substring(0, 1).toUpperCase(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: colors.onPrimaryContainer, // Contrast color for text
-                  fontSize: 16,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16), // More space between avatar and content
-            // Middle: main content column (header + body + footer).
-            Expanded(
+      // Card with colorful background, no shadow
+      elevation: 0, // No shadow
+      color: colors.surface, // Card background
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20), // More rounded for Venmo/Spotify feel
+        side: BorderSide(
+          color: colors.primary.withOpacity(0.3), // Colored border accent
+          width: 1.5,
+        ),
+      ),
+      margin: const EdgeInsets.only(bottom: 16), // Spacing between cards
+      child: Container(
+        // Add subtle gradient overlay for more color depth
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.surface,
+              colors.surface.withOpacity(0.95),
+              colors.primaryContainer.withOpacity(0.1),
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0), // Comfortable desktop padding
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // Middle: main content column (header + body + footer).
+              Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -211,16 +193,6 @@ class _DonationCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      // Time - tertiary text color, right-aligned
-                      Text(
-                        _formatRelativeTime(donation.createdAt),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant.withOpacity(
-                            0.7,
-                          ), // Subtle tertiary
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 10), // More spacing after header
@@ -242,49 +214,128 @@ class _DonationCard extends StatelessWidget {
                         fontSize: 24,
                       ), // Slightly larger for better visibility
                     ),
-                  const SizedBox(height: 10),
-                  // FOOTER: summary line like "Paid $25.00 to Clean Water Now".
-                  // Highlight amount with primary color for emphasis
-                  // Organization name is clickable and navigates to the organization profile
-                  RichText(
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colors.onSurfaceVariant,
+                  const SizedBox(height: 12),
+                  // FOOTER: Organization recipient section - Venmo/Spotify colorful style
+                  // Shows organization logo, amount, and organization name
+                  // This makes it very clear who the donation went to
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      // Colorful gradient background (Venmo/Spotify style)
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                          colors.primaryContainer.withOpacity(0.5),
+                          colors.secondaryContainer.withOpacity(0.4),
+                          colors.tertiaryContainer.withOpacity(0.3),
+                        ],
                       ),
-                      children: <TextSpan>[
-                        const TextSpan(text: 'Paid '),
-                        TextSpan(
-                          text: '\$${donation.amountUsd.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: colors
-                                .primary, // Highlight amount with primary color
-                            fontWeight: FontWeight.w600,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colors.primary.withOpacity(0.4),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: InkWell(
+                      // Make the entire organization section clickable
+                      onTap: organization != null
+                          ? () {
+                              // Navigate to the organization profile page using GoRouter
+                              context.push(
+                                '/organization/${organization.id}',
+                              );
+                            }
+                          : null,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Row(
+                        children: <Widget>[
+                          // Organization logo/icon - shows who received the donation
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: OrganizationImage(
+                              imageUrl: organization?.logoUrl ?? '',
+                              width: 48,
+                              height: 48,
+                              fit: BoxFit.cover,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                        ),
-                        const TextSpan(text: ' to '),
-                        // Make organization name clickable - wrap in GestureRecognizer
-                        // This allows the text to be tappable while keeping it inline
-                        TextSpan(
-                          text: organization?.name ?? 'Unknown organization',
-                          style: TextStyle(
-                            color: colors
-                                .primary, // Use primary color to indicate it's clickable
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                            decorationColor: colors.primary,
+                          const SizedBox(width: 12),
+                          // Organization info and amount
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                // "Donated to" label for clarity
+                                Text(
+                                  'Donated to',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: colors.onSurfaceVariant,
+                                        fontSize: 11,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                // Organization name - bold and prominent
+                                Text(
+                                  organization?.name ?? 'Unknown organization',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        color: colors.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
-                          recognizer: organization != null
-                              ? (TapGestureRecognizer()
-                                  ..onTap = () {
-                                    // Navigate to the organization profile page using GoRouter
-                                    // The route expects the organization ID as a path parameter
-                                    context.push(
-                                      '/organization/${organization.id}',
-                                    );
-                                  })
-                              : null,
-                        ),
-                      ],
+                          // Amount displayed prominently on the right
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              Text(
+                                '\$${donation.amountUsd.toStringAsFixed(2)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      color: colors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              // Verification badge if organization is verified
+                              if (organization?.isVerified ?? false) ...[
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.verified,
+                                      size: 14,
+                                      color: colors.primary,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      'Verified',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: colors.primary,
+                                            fontSize: 10,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -317,25 +368,9 @@ class _DonationCard extends StatelessWidget {
             ),
           ],
         ),
+        ),
       ),
     );
   }
 }
 
-/// Formats a `DateTime` into a simple relative time string such as "2h ago".
-///
-/// This is intentionally very lightweight – it is *not* a full i18n solution,
-/// but it is good enough to make the demo feel more realistic.
-String _formatRelativeTime(DateTime time) {
-  final Duration diff = DateTime.now().difference(time);
-
-  if (diff.inMinutes < 1) {
-    return 'just now';
-  } else if (diff.inMinutes < 60) {
-    return '${diff.inMinutes} min ago';
-  } else if (diff.inHours < 24) {
-    return '${diff.inHours} h ago';
-  } else {
-    return '${diff.inDays} d ago';
-  }
-}

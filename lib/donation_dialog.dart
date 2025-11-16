@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:developer' as developer;
 
 import 'demo_data/organizations.dart';
 import 'donate_button_function.dart';
 import 'n8n_service.dart';
+import 'widgets/organization_image.dart';
 
 /// DONATION DIALOG WIDGET
 /// -----------------------
@@ -78,13 +78,31 @@ class _DonationDialogState extends State<DonationDialog> {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Dialog(
-      // Rounded corners for modern look (Venmo-style)
+      // Venmo/Spotify style with colorful design
+      backgroundColor: colors.surface, // Dialog background
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24), // More rounded for Venmo/Spotify feel
+        side: BorderSide(
+          color: colors.primary.withOpacity(0.3), // Colored border accent
+          width: 1.5,
+        ),
       ),
       // Remove default padding so we can control spacing ourselves
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Container(
+        // Add subtle gradient overlay for more color depth
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.surface,
+              colors.surface.withOpacity(0.95),
+              colors.primaryContainer.withOpacity(0.1),
+            ],
+          ),
+        ),
         // Constrain width for better desktop/mobile experience
         constraints: const BoxConstraints(maxWidth: 400),
         child: SingleChildScrollView(
@@ -100,34 +118,14 @@ class _DonationDialogState extends State<DonationDialog> {
                 Row(
                   children: <Widget>[
                     // Organization logo - circular for clean look
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        widget.organization.logoUrl,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                        errorBuilder: (
-                          BuildContext context,
-                          Object error,
-                          StackTrace? stackTrace,
-                        ) {
-                          // Fallback if image fails to load
-                          return Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: colors.primaryContainer,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.business,
-                              size: 30,
-                              color: colors.onPrimaryContainer,
-                            ),
-                          );
-                        },
-                      ),
+                    // Uses OrganizationImage helper widget which handles
+                    // both asset images and network images automatically
+                    OrganizationImage(
+                      imageUrl: widget.organization.logoUrl,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      borderRadius: BorderRadius.circular(16), // Match container border radius
                     ),
                     const SizedBox(width: 16),
                     // Organization name and tagline
@@ -289,7 +287,7 @@ class _DonationDialogState extends State<DonationDialog> {
                       backgroundColor: colors.primary,
                       foregroundColor: colors.onPrimary,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16), // Match container border radius
                       ),
                       // Disabled state styling
                       disabledBackgroundColor: colors.surfaceVariant,
@@ -364,59 +362,11 @@ class _DonationDialogState extends State<DonationDialog> {
       // Format: https://matt-cornelius.app.n8n.cloud/webhook-test/01f63d59-ebc8-4886-9770-6924e17002be
       final String n8nUrl = '${N8nService.baseUrl}/webhook-test/01f63d59-ebc8-4886-9770-6924e17002be';
 
-      // Debug logging: Log donation request details
-      developer.log(
-        '=== DONATION REQUEST START ===',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Organization: ${widget.organization.name} (${widget.organization.id})',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Amount: \$${amount.toStringAsFixed(2)}',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Email: $email',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Target URL: $n8nUrl',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Request Body: ${donationRequest.toJson()}',
-        name: 'DonationDialog',
-      );
-
       // Call the submitDonation function from donate_button_function.dart
       // This makes an HTTP POST request to the n8n webhook with the donation data
-      developer.log(
-        'Sending HTTP POST request...',
-        name: 'DonationDialog',
-      );
       final DonationResponse response = await submitDonation(
         url: n8nUrl,
         donationRequest: donationRequest,
-      );
-
-      // Debug logging: Log successful response
-      developer.log(
-        '=== DONATION REQUEST SUCCESS ===',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Response Success: ${response.success}',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Response Message: ${response.message ?? "No message"}',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Donation ID: ${response.donationId ?? "No ID"}',
-        name: 'DonationDialog',
       );
 
       // Close loading dialog
@@ -437,21 +387,6 @@ class _DonationDialogState extends State<DonationDialog> {
         ),
       );
     } on DonationApiException catch (e) {
-      // Debug logging: Log API exception
-      developer.log(
-        '=== DONATION REQUEST FAILED (API Exception) ===',
-        name: 'DonationDialog',
-        error: e,
-      );
-      developer.log(
-        'Error Message: ${e.message}',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Status Code: ${e.statusCode ?? "Unknown"}',
-        name: 'DonationDialog',
-      );
-
       // Close loading dialog
       Navigator.of(context).pop(); // Close loading
 
@@ -471,22 +406,6 @@ class _DonationDialogState extends State<DonationDialog> {
         ),
       );
     } catch (e, stackTrace) {
-      // Debug logging: Log unexpected error with stack trace
-      developer.log(
-        '=== DONATION REQUEST FAILED (Unexpected Error) ===',
-        name: 'DonationDialog',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      developer.log(
-        'Error Type: ${e.runtimeType}',
-        name: 'DonationDialog',
-      );
-      developer.log(
-        'Error Details: $e',
-        name: 'DonationDialog',
-      );
-
       // Close loading dialog
       Navigator.of(context).pop(); // Close loading
 
@@ -528,21 +447,34 @@ class _AmountButton extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16), // Match container border radius
       child: Container(
         width: 100, // Fixed width for consistent grid
         height: 56, // Tall enough for easy tapping
         decoration: BoxDecoration(
-          // Selected: primary color background
-          // Unselected: light background with border
-          color: isSelected ? colors.primary : colors.surfaceVariant,
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected
-              ? null
-              : Border.all(
-                  color: colors.outline,
-                  width: 1.5,
-                ),
+          // Colorful gradient for selected, subtle gradient for unselected (Venmo/Spotify style)
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isSelected
+                ? <Color>[
+                    colors.primary,
+                    colors.primary.withOpacity(0.9),
+                    colors.secondaryContainer.withOpacity(0.3),
+                  ]
+                : <Color>[
+                    colors.surfaceVariant.withOpacity(0.6),
+                    colors.surfaceVariant.withOpacity(0.4),
+                    colors.primaryContainer.withOpacity(0.1),
+                  ],
+          ),
+          borderRadius: BorderRadius.circular(16), // More rounded for Venmo/Spotify feel
+          border: Border.all(
+            color: isSelected
+                ? colors.primary
+                : colors.primary.withOpacity(0.4), // Colored border even when not selected
+            width: 1.5,
+          ),
         ),
         child: Center(
           child: Text(
@@ -578,19 +510,34 @@ class _CustomAmountButton extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16), // Match container border radius
       child: Container(
         width: 100,
         height: 56,
         decoration: BoxDecoration(
-          color: isSelected ? colors.primary : colors.surfaceVariant,
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected
-              ? null
-              : Border.all(
-                  color: colors.outline,
-                  width: 1.5,
-                ),
+          // Colorful gradient for selected, subtle gradient for unselected (Venmo/Spotify style)
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isSelected
+                ? <Color>[
+                    colors.primary,
+                    colors.primary.withOpacity(0.9),
+                    colors.secondaryContainer.withOpacity(0.3),
+                  ]
+                : <Color>[
+                    colors.surfaceVariant.withOpacity(0.6),
+                    colors.surfaceVariant.withOpacity(0.4),
+                    colors.primaryContainer.withOpacity(0.1),
+                  ],
+          ),
+          borderRadius: BorderRadius.circular(16), // More rounded for Venmo/Spotify feel
+          border: Border.all(
+            color: isSelected
+                ? colors.primary
+                : colors.primary.withOpacity(0.4), // Colored border even when not selected
+            width: 1.5,
+          ),
         ),
         child: Center(
           child: Text(

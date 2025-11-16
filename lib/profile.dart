@@ -16,27 +16,40 @@ class ProfilePage extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // AppBar automatically uses theme - clean and modern
+      // Venmo/Spotify style with colorful background
+      backgroundColor: colors.surfaceVariant, // More colorful background, less white
       appBar: AppBar(
         title: const Text('Profile'),
         // Centering the title gives a slightly more "polished" feel.
         centerTitle: true,
+        elevation: 0, // Flat design
       ),
-      // Using theme background color for consistency
-      backgroundColor: colors.background,
-      body: SafeArea(
-        // SingleChildScrollView allows the whole page to scroll on small screens.
-        child: SingleChildScrollView(
-          // For desktop apps, we center the content and constrain its width
-          child: Center(
-            child: ConstrainedBox(
-              // Max width prevents content from stretching too wide on large desktop screens
-              // 700px is a good max width for profile page readability
-              constraints: const BoxConstraints(maxWidth: 700),
-              child: Padding(
-                padding: const EdgeInsets.all(
-                  20.0,
-                ), // More padding for cleaner look
+      body: Container(
+        // Add gradient background for more color (Venmo/Spotify style)
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.primaryContainer.withOpacity(0.4),
+              colors.secondaryContainer.withOpacity(0.3),
+              colors.tertiaryContainer.withOpacity(0.2),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          // SingleChildScrollView allows the whole page to scroll on small screens.
+          child: SingleChildScrollView(
+            // For desktop apps, we center the content and constrain its width
+            child: Center(
+              child: ConstrainedBox(
+                // Max width prevents content from stretching too wide on large desktop screens
+                // 700px is a good max width for profile page readability
+                constraints: const BoxConstraints(maxWidth: 700),
+                child: Padding(
+                  padding: const EdgeInsets.all(
+                    24.0,
+                  ), // More padding for cleaner look
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment
                       .center, // Center all content horizontally
@@ -145,6 +158,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
           ),
+        ),
         ),
       ),
       // Index mapping after adding the Groups tab:
@@ -311,9 +325,32 @@ class ProfilePage extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Card(
-      // Card automatically uses theme - modern rounded corners with border
-      // Theme sets elevation to 0 and uses border instead for flat design
-      child: Padding(
+      // Venmo/Spotify style colorful card
+      elevation: 0, // No shadow
+      color: colors.surface, // Card background
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20), // More rounded for Venmo/Spotify feel
+        side: BorderSide(
+          color: colors.primary.withOpacity(0.3), // Colored border accent
+          width: 1.5,
+        ),
+      ),
+      margin: const EdgeInsets.only(bottom: 16), // Spacing between cards
+      child: Container(
+        // Add subtle gradient overlay for more color depth
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.surface,
+              colors.surface.withOpacity(0.95),
+              colors.primaryContainer.withOpacity(0.1),
+            ],
+          ),
+        ),
+        child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20.0,
           vertical: 16.0,
@@ -349,6 +386,7 @@ class ProfilePage extends StatelessWidget {
             ...children,
           ],
         ),
+        ),
       ),
     );
   }
@@ -375,12 +413,21 @@ class _ProfileStatCard extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Container(
-      // Modern, rounded container with subtle background color
+      // Venmo/Spotify style colorful stat card
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1), // Subtle background tint
-        borderRadius: BorderRadius.circular(16), // More rounded for modern look
-        // Subtle border for definition
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
+        // Colorful gradient background (Venmo/Spotify style)
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            color.withOpacity(0.2),
+            color.withOpacity(0.15),
+            color.withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20), // More rounded for Venmo/Spotify feel
+        // Colored border for definition
+        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
       ),
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
@@ -480,8 +527,8 @@ class _ProfileTile extends StatelessWidget {
               color: colors.onSurfaceVariant, // Secondary text color
             ),
           ),
-          // Trailing chevron in secondary color
-          trailing: Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
+          // Trailing chevron in primary color for more vibrancy
+          trailing: Icon(Icons.chevron_right, color: colors.primary),
           onTap: onTap,
         ),
         // Divider visually separates this tile from the next one.

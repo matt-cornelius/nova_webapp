@@ -47,22 +47,37 @@ class GroupsPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      // AppBar automatically uses theme - clean and modern
+      // Venmo/Spotify style with colorful background
+      backgroundColor: colors.surfaceVariant, // More colorful background, less white
       appBar: AppBar(
         title: const Text('Groups'),
         centerTitle: true, // Center the title in the AppBar
+        elevation: 0, // Flat design
       ),
-      body: SafeArea(
-        // For desktop apps, we center the content and constrain its width
-        child: Center(
-          child: ConstrainedBox(
-            // Max width prevents content from stretching too wide on large desktop screens
-            // 800px is a good max width for desktop readability
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Padding(
-              padding: const EdgeInsets.all(
-                20.0,
-              ), // More padding for cleaner look
+      body: Container(
+        // Add gradient background for more color (Venmo/Spotify style)
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.primaryContainer.withOpacity(0.4),
+              colors.secondaryContainer.withOpacity(0.3),
+              colors.tertiaryContainer.withOpacity(0.2),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          // For desktop apps, we center the content and constrain its width
+          child: Center(
+            child: ConstrainedBox(
+              // Max width prevents content from stretching too wide on large desktop screens
+              // 800px is a good max width for desktop readability
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Padding(
+                padding: const EdgeInsets.all(
+                  24.0,
+                ), // More padding for cleaner look
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment
                     .center, // Center all content horizontally
@@ -109,6 +124,7 @@ class GroupsPage extends StatelessWidget {
             ),
           ),
         ),
+        ),
       ),
       // Index 1 because Groups sits between Home (0) and Explore (2) in the nav.
       bottomNavigationBar: const MainNavBar(currentIndex: 1),
@@ -141,9 +157,32 @@ class _GroupCard extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Card(
-      // Card automatically uses theme - modern rounded corners with border
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
+      // Venmo/Spotify style colorful card
+      elevation: 0, // No shadow
+      color: colors.surface, // Card background
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20), // More rounded for Venmo/Spotify feel
+        side: BorderSide(
+          color: colors.primary.withOpacity(0.3), // Colored border accent
+          width: 1.5,
+        ),
+      ),
+      margin: const EdgeInsets.only(bottom: 16), // Spacing between cards
+      child: Container(
+        // Add subtle gradient overlay for more color depth
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.surface,
+              colors.surface.withOpacity(0.95),
+              colors.primaryContainer.withOpacity(0.1),
+            ],
+          ),
+        ),
+        child: ListTile(
         // Leading circle avatar with the first letter of the group name.
         // Uses primary color for modern, professional look
         leading: CircleAvatar(
@@ -195,8 +234,8 @@ class _GroupCard extends StatelessWidget {
           horizontal: 20,
           vertical: 12,
         ), // More padding for cleaner look
-        // Trailing chevron in secondary color
-        trailing: Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
+        // Trailing chevron in primary color for more vibrancy
+        trailing: Icon(Icons.chevron_right, color: colors.primary),
         onTap: () {
           // When the user taps a group, navigate to the **group chat** page
           // using GoRouter. We pass the group name through `extra` so the
@@ -210,6 +249,7 @@ class _GroupCard extends StatelessWidget {
             extra: <String, String>{'name': group.name},
           );
         },
+        ),
       ),
     );
   }

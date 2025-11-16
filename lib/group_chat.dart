@@ -36,10 +36,23 @@ class _ChatMessage {
   /// We use this to decide the bubble color and alignment (right vs left).
   final bool isMe;
 
+  /// Whether this message represents a donation.
+  /// If true, the message will be displayed as a green donation card.
+  final bool isDonation;
+
+  /// The donation amount (only used if isDonation is true).
+  final double? donationAmount;
+
+  /// The organization name that received the donation (only used if isDonation is true).
+  final String? organizationName;
+
   const _ChatMessage({
     required this.sender,
     required this.text,
     required this.isMe,
+    this.isDonation = false,
+    this.donationAmount,
+    this.organizationName,
   });
 }
 
@@ -63,6 +76,23 @@ class _GroupChatPageState extends State<GroupChatPage> {
       sender: 'Taylor',
       text: 'Love it. Let\'s send to Clean Water Now again.',
       isMe: false,
+    ),
+    // Example donation messages - these will be displayed as green cards
+    const _ChatMessage(
+      sender: 'Alex',
+      text: 'Donated \$20',
+      isMe: false,
+      isDonation: true,
+      donationAmount: 20.0,
+      organizationName: 'Clean Water Now',
+    ),
+    const _ChatMessage(
+      sender: 'You',
+      text: 'Donated \$25',
+      isMe: true,
+      isDonation: true,
+      donationAmount: 25.0,
+      organizationName: 'Clean Water Now',
     ),
   ];
 
@@ -117,12 +147,8 @@ class _GroupChatPageState extends State<GroupChatPage> {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // Using a slightly different background than the other screens so the
-      // chat feels more like iMessage / Messages.
-      // Using theme surface variant for consistency with modern feel
-      backgroundColor: colors.surfaceVariant.withOpacity(
-        0.5,
-      ), // Light chat background
+      // Venmo/Spotify style with colorful background
+      backgroundColor: colors.surfaceVariant, // More colorful background, less white
       appBar: AppBar(
         elevation: 0, // Flat design for modern look
         // Use theme surface color for consistency
@@ -176,14 +202,27 @@ class _GroupChatPageState extends State<GroupChatPage> {
           ],
         ),
       ),
-      body: SafeArea(
-        // For desktop apps, we center the chat content and constrain its width
-        child: Center(
-          child: ConstrainedBox(
-            // Max width prevents chat from stretching too wide on large desktop screens
-            // 800px is a good max width for chat readability
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Column(
+      body: Container(
+        // Add gradient background for more color (Venmo/Spotify style)
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              colors.primaryContainer.withOpacity(0.3),
+              colors.secondaryContainer.withOpacity(0.2),
+              colors.tertiaryContainer.withOpacity(0.15),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          // For desktop apps, we center the chat content and constrain its width
+          child: Center(
+            child: ConstrainedBox(
+              // Max width prevents chat from stretching too wide on large desktop screens
+              // 800px is a good max width for chat readability
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Column(
               children: <Widget>[
                 // Expanded message list takes up all available vertical space above
                 // the input bar at the bottom.
@@ -197,6 +236,11 @@ class _GroupChatPageState extends State<GroupChatPage> {
                     itemCount: _messages.length,
                     itemBuilder: (BuildContext context, int index) {
                       final _ChatMessage message = _messages[index];
+                      // If this is a donation message, show the donation card instead of a regular bubble
+                      if (message.isDonation) {
+                        return _DonationCard(message: message);
+                      }
+                      // Otherwise, show the regular message bubble
                       return _MessageBubble(message: message);
                     },
                   ),
@@ -282,6 +326,137 @@ class _GroupChatPageState extends State<GroupChatPage> {
             ),
           ),
         ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Renders a donation message as a compact green card integrated into the chat flow.
+/// The card is styled like a message bubble but with green color to indicate a donation.
+class _DonationCard extends StatelessWidget {
+  final _ChatMessage message;
+
+  const _DonationCard({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    // Determine if this is from the current user (affects alignment)
+    final bool isMe = message.isMe;
+
+    // Get theme colors for consistent styling
+    final ColorScheme colors = Theme.of(context).colorScheme;
+
+    // Use green color for donation cards - vibrant but not too bright
+    // Colors.green[500] or [600] provides a nice balance
+    final Color donationColor = Colors.green[600] ?? Colors.green;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4), // Same padding as regular messages
+      child: Row(
+        // Align like regular messages: right for "me", left for others
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        children: <Widget>[
+          // Show avatar for other participants (same as regular messages)
+          if (!isMe) ...<Widget>[
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: colors.surfaceVariant,
+              child: Text(
+                message.sender.substring(0, 1).toUpperCase(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: colors.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          // Compact donation card styled like a message bubble
+          Flexible(
+            // Flexible allows the card to wrap nicely and not overflow
+            child: Container(
+              // Compact padding - smaller than before for seamless integration
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: donationColor, // Green background for donations
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(18),
+                  topRight: const Radius.circular(18),
+                  // Asymmetric bottom corners like message bubbles (tail effect)
+                  bottomLeft: Radius.circular(isMe ? 18 : 4),
+                  bottomRight: Radius.circular(isMe ? 4 : 18),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: isMe
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Show sender name for others (like regular messages)
+                  if (!isMe)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        message.sender,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ),
+                  // Compact donation info in a single row
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    // Align icon and text based on sender
+                    mainAxisAlignment: isMe
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
+                    children: <Widget>[
+                      // Small heart icon to indicate donation
+                      Icon(
+                        Icons.favorite,
+                        color: Colors.white,
+                        size: 14, // Smaller icon for compact design
+                      ),
+                      const SizedBox(width: 6),
+                      // Donation amount in compact format
+                      Text(
+                        '\$${message.donationAmount?.toStringAsFixed(0) ?? '0'}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15, // Same size as regular message text
+                          fontWeight: FontWeight.bold,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Organization name on a separate line (if provided)
+                  if (message.organizationName != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      message.organizationName!,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          // Small spacing for "me" messages (matches regular message layout)
+          if (isMe) const SizedBox(width: 6),
+        ],
       ),
     );
   }
@@ -301,13 +476,13 @@ class _MessageBubble extends StatelessWidget {
     // Get theme colors for consistent styling
     final ColorScheme colors = Theme.of(context).colorScheme;
 
-    // Choose bubble color:
-    // - primary color for my messages (modern, professional)
-    // - surface color for incoming messages (clean, subtle)
+    // Choose bubble color with gradients for more color (Venmo/Spotify style):
+    // - primary color gradient for my messages (vibrant, modern)
+    // - colorful surface variant for incoming messages (less white)
     final Color bubbleColor = isMe
         ? colors
               .primary // Use theme primary color for sent messages
-        : colors.surface; // Use theme surface for received messages
+        : colors.surfaceVariant.withOpacity(0.6); // More colorful for received messages
 
     // Choose text color to keep contrast good.
     // Theme provides proper contrast colors automatically
