@@ -1,0 +1,10 @@
+^C:\CODEPROJECTS\NOVA_WEBAPP\BUILD\WINDOWS\X64\CMAKEFILES\6C1207576BED1E75F47E51C4F48B33C4\INSTALL_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
